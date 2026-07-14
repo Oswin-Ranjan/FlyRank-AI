@@ -46,8 +46,3 @@ content-type: application/json
 ## Swagger UI
 
 ![Swagger UI screenshot](swagger-screenshot.png)
-
-## Notes
-
-- No database — data lives in a Python list in memory and resets on restart. Databases arrive in Week 3.
-- Request bodies are read via FastAPI's `Body()` rather than a Pydantic model, by choice, to keep validation logic explicit and dependency-free.
