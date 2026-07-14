@@ -1,6 +1,6 @@
 # FlyRank AI Internship Assignments
 
-This repository contains the assignments, tasks, and mini-projects completed during my Software Engineering Internship at **FlyRank AI**. It documents my hands-on learning, problem-solving approach, and practical experience gained throughout the internship.
+This repository contains the assignments, tasks, and mini-projects completed during my Backend AI Engineer Internship at **FlyRank AI**. It documents my hands-on learning, problem-solving approach, and practical experience gained throughout the internship.
 
 ## What You'll Find
 
