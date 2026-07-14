@@ -43,3 +43,33 @@ async def create_task(request: Request):
     task = {"id": next_id, "title": title, "done": False}
     tasks.append(task)
     return task
+  
+@app.put("/tasks/{task_id}")
+async def update_task(task_id: int, request: Request):
+    task = next((t for t in tasks if t["id"] == task_id), None)
+    if task is None:
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+ 
+    body = await request.json()
+ 
+    if "title" in body:
+        title = body["title"]
+        if not isinstance(title, str) or not title.strip():
+            raise HTTPException(status_code=400, detail="Title cannot be empty")
+        task["title"] = title.strip()
+ 
+    if "done" in body:
+        if not isinstance(body["done"], bool):
+            raise HTTPException(status_code=400, detail="done must be true or false")
+        task["done"] = body["done"]
+ 
+    return task
+ 
+ 
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int):
+    task = next((t for t in tasks if t["id"] == task_id), None)
+    if task is None:
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+ 
+    tasks.remove(task)  
