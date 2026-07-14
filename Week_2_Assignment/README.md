@@ -15,7 +15,7 @@ A REST API for managing tasks (id, title, done). Data is stored in memory only â
 
 2. Start the server:
    ```bash
-   uvicorn main:app --reload
+   uvicorn app:app --reload
    ```
 
 3. The API is now running at `http://localhost:8000`. Interactive docs (Swagger UI) are at `http://localhost:8000/docs`.
