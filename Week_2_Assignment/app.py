@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 
 app = FastAPI()
 
 tasks = [
-    {"id": 1, "title": "Buy milk", "done": False},
+    {"id": 1, "title": "Complete tasks", "done": False},
     {"id": 2, "title": "Write README", "done": False},
     {"id": 3, "title": "Push to GitHub", "done": True},
 ]
@@ -30,3 +30,16 @@ def get_task(task_id: int):
         if task["id"] == task_id:
             return task
     raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+  
+@app.post("/tasks", status_code=201)
+async def create_task(request: Request):
+    body = await request.json()
+    title = body.get("title", "")
+
+    if not isinstance(title, str) or not title.strip():
+        raise HTTPException(status_code=400, detail="Title cannot be empty")
+
+    next_id = max((t["id"] for t in tasks), default=0) + 1
+    task = {"id": next_id, "title": title, "done": False}
+    tasks.append(task)
+    return task
