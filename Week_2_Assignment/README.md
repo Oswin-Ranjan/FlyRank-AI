@@ -1,4 +1,4 @@
-# Task API
+# CRUD API
 
 A small in-memory to-do list API built with FastAPI, supporting full CRUD (Create, Read, Update, Delete) on tasks. Built for FlyRank Backend Internship — Week 2, Assignment A1.
 
