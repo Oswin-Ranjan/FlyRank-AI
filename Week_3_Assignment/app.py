@@ -66,12 +66,21 @@ async def create_task(body: dict = Body(...)):
     title = body.get("title", "")
     title = title.strip() if isinstance(title, str) else ""
 
-    if not title:
-        raise HTTPException(status_code=400, detail="Title cannot be empty")
-
-    task = {"id": max((t["id"] for t in tasks), default=0) + 1, "title": title, "done": False}
-    tasks.append(task)
-    return task
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+    "INSERT INTO tasks(title, done) VALUES (?, ?)",
+    (title, 0)
+    )
+    conn.commit()
+    task_id = cursor.lastrowid
+    conn.close()
+    
+    return {
+    "id": task_id,
+    "title": title,
+    "done": False
+    }
 
 @app.put("/tasks/{task_id}", summary="Update a task")
 async def update_task(task_id: int, body: dict = Body(...)):
