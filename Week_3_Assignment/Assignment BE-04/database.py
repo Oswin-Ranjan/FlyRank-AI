@@ -1,14 +1,21 @@
 import os
 from dotenv import load_dotenv
 import psycopg
+from psycopg.rows import dict_row
 
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL not set")
+
 
 def get_connection():
-    return psycopg.connect(DATABASE_URL)
+    return psycopg.connect(
+        DATABASE_URL,
+        row_factory=dict_row
+    )
 
 
 def init_db():
@@ -23,8 +30,8 @@ def init_db():
     )
     """)
 
-    cursor.execute("SELECT COUNT(*) FROM tasks")
-    count = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) AS count FROM tasks")
+    count = cursor.fetchone()["count"]
 
     if count == 0:
         cursor.executemany(
