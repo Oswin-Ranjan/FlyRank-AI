@@ -9,7 +9,7 @@ def root():
     """Returns basic info about this API and its endpoints."""
     return {
         "name": "Task API",
-        "version": "1.0",
+        "version": "1.1",
         "endpoints": ["/tasks"]
     }
 
