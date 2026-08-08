@@ -1,7 +1,7 @@
 
-# CRUD API with SQLite
+# CRUD API with PostgreSQL
 
-A RESTful Task API built with **FastAPI** and **SQLite**, supporting full CRUD (Create, Read, Update, Delete) operations. This project was developed for the **FlyRank Backend Internship – Week 3, Assignment A2**.
+A RESTful Task API built with **FastAPI** and **PostgreSQL**, supporting full CRUD (Create, Read, Update, Delete) operations. This project was developed for the **FlyRank Backend Internship – Week 3, Assignment BE-04**.
 
 ---
 
@@ -13,54 +13,61 @@ This API manages tasks with three fields:
 - **title** – Task title
 - **done** – Task completion status
 
-Unlike Assignment 1, task data is now stored in a **SQLite database (`tasks.db`)**, so it persists even after the server is restarted.
+Unlike Assignment 1, task data is now stored in a **PostgreSQL database**, ensuring persistence and production-level reliability.
 
 ---
 
-## Why SQLite?
+## Why PostgreSQL?
 
-SQLite was chosen because it:
+PostgreSQL was chosen because it:
 
-- Is lightweight and serverless
-- Requires no separate installation or configuration
-- Stores all data in a single file (`tasks.db`)
-- Automatically creates the database when the application starts
-- Keeps data persistent across server restarts
+- Supports strict data types like BOOLEAN and SERIAL
+- Is widely used in production systems
+- Handles concurrent users efficiently
+- Provides better data integrity than SQLite
+- Works seamlessly with Docker-based environments
+
+---
+
+## Why Docker?
+
+Docker was used because it:
+
+- Runs API and database in separate containers
+- Eliminates the need for local database installation
+- Ensures consistent setup across different systems
+- Allows running the full stack with a single command
 
 ---
 
 ## Database
 
-The application automatically creates:
+The application connects to PostgreSQL using:
 
-```
-tasks.db
-```
+DATABASE_URL=postgresql://postgres:dev@db:5432/tasks
 
-on startup if it doesn't already exist.
-
-It also:
+On startup, the application:
 
 - Creates the `tasks` table automatically
 - Inserts three sample tasks only when the table is empty
-- Does not duplicate the sample tasks on future restarts
+- Does not duplicate sample tasks on future restarts
 
-> **Note:** `tasks.db` is included in `.gitignore` so every fresh clone creates its own database automatically.
+> **Note:** Data is persisted using Docker volumes, so it remains even after containers are restarted.
 
 ---
 
 ## How to Run
 
-### 1. Install dependencies
+### 1. Create environment file
 
 ```bash
-pip install -r requirements.txt
+cp .env.example .env
 ```
 
-### 2. Start the server
+### 2. Start the application
 
 ```bash
-uvicorn app:app --reload
+docker compose up --build
 ```
 
 ### 3. Open the API
@@ -68,13 +75,13 @@ uvicorn app:app --reload
 API:
 
 ```
-http://localhost:8000
+http://localhost:3000
 ```
 
 Swagger UI:
 
 ```
-http://localhost:8000/docs
+http://localhost:3000/docs
 ```
 
 ---
@@ -96,7 +103,7 @@ http://localhost:8000/docs
 ## Example Request
 
 ```bash
-curl -X POST http://localhost:8000/tasks \
+curl -X POST http://localhost:3000/tasks \
 -H "Content-Type: application/json" \
 -d '{"title":"Buy milk"}'
 ```
@@ -127,7 +134,7 @@ Returns the total number of tasks currently stored in the database.
 
 ## Database Screenshot
 
-<img width="3838" height="2038" alt="Screenshot 2026-07-26 230330-Picsart-AiImageEnhancer" src="https://github.com/user-attachments/assets/9f6bad38-8399-4c0d-b99f-dd1125675ac3" />
+C:\Users\ranja\OneDrive\Desktop\Documents\GitHub\FlyRank-AI\Week_3_Assignment\Assignment BE-04\image.png
 
 ---
 
@@ -135,19 +142,20 @@ Returns the total number of tasks currently stored in the database.
 
 - Python 3
 - FastAPI
-- SQLite
-- sqlite3
+- PostgreSQL
+- Psycopg
+- Docker
+- Docker Compose
 - Uvicorn
 
 ---
 
 ## Assignment Features
 
-- SQLite database integration
-- Automatic database creation
+- PostgreSQL database integration
 - Automatic table creation
 - Automatic seeding of sample tasks
-- Persistent data storage
+- Persistent data storage using Docker volumes
 - Parameterized SQL queries
 - Full CRUD operations
 - Swagger API documentation
