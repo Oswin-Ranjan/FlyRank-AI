@@ -134,7 +134,8 @@ Returns the total number of tasks currently stored in the database.
 
 ## Database Screenshot
 
-C:\Users\ranja\OneDrive\Desktop\Documents\GitHub\FlyRank-AI\Week_3_Assignment\Assignment BE-04\image.png
+<img width="935" height="559" alt="Screenshot 2026-08-08 193409" src="https://github.com/user-attachments/assets/d819a7dd-d003-4b88-8781-28a639561e61" />
+
 
 ---
 
