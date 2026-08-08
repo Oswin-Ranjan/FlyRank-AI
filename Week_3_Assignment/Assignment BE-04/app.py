@@ -62,24 +62,36 @@ def get_task(task_id: int):
 
 @app.post("/tasks", status_code=201, summary="Create a task")
 async def create_task(body: dict = Body(...)):
-    """Creates a new task from a JSON body with a 'title' field. 400 if title is missing or empty."""
     title = body.get("title", "")
     title = title.strip() if isinstance(title, str) else ""
 
+    if not title:
+        raise HTTPException(
+            status_code=400,
+            detail="Title cannot be empty"
+        )
+
     conn = get_connection()
     cursor = conn.cursor()
+
     cursor.execute(
-    "INSERT INTO tasks(title, done) VALUES (%s, %s)",
-    (title, 0)
+        """
+        INSERT INTO tasks(title, done)
+        VALUES (%s, %s)
+        RETURNING id
+        """,
+        (title, False)
     )
+
+    task_id = cursor.fetchone()["id"]
+
     conn.commit()
-    task_id = cursor.lastrowid
     conn.close()
-    
+
     return {
-    "id": task_id,
-    "title": title,
-    "done": False
+        "id": task_id,
+        "title": title,
+        "done": False
     }
 
 @app.put("/tasks/{task_id}", summary="Update a task")
@@ -129,7 +141,7 @@ async def update_task(task_id: int, body: dict = Body(...)):
         SET title = %s, done = %s
         WHERE id = %s
         """,
-        (title, int(done), task_id)
+        (title, done, task_id)
     )
 
     conn.commit()
