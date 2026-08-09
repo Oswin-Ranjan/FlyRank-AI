@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Body, HTTPException, Header
 from auth import signup_user, login_user
+from database import supabase
 
 app = FastAPI()
 
@@ -58,17 +59,37 @@ def public_info():
 @app.get("/protected/profile")
 def protected_profile(authorization: str = Header(None)):
 
-    # ❗ Check if header exists
+    # 1️⃣ Check header
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=401,
             detail="Access token required"
         )
 
-    # ❗ Extract token (not verifying yet)
+    # 2️⃣ Extract token
     token = authorization.split(" ")[1]
 
+    # 3️⃣ Verify with Supabase (HANDLE ERROR 🔥)
+    try:
+        response = supabase.auth.get_user(token)
+        user = response.user
+    except Exception:
+        # ❗ THIS handles malformed / tampered token
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired token"
+        )
+
+    # 4️⃣ Extra safety
+    if user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired token"
+        )
+
+    # 5️⃣ Return safe data
     return {
-        "message": "Access granted (token received)",
-        "token": token
+        "id": user.id,
+        "email": user.email,
+        "created_at": user.created_at
     }
