@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Body, HTTPException
+from fastapi import FastAPI, Body, HTTPException, Header
 from auth import signup_user, login_user
 
 app = FastAPI()
@@ -49,4 +49,26 @@ def login(body: dict = Body(...)):
     return {
         "access_token": response.session.access_token,
         "refresh_token": response.session.refresh_token
+    }
+    
+@app.get("/public/info")
+def public_info():
+  return {"message": "Welcome stranger! This info is public."}
+
+@app.get("/protected/profile")
+def protected_profile(authorization: str = Header(None)):
+
+    # ❗ Check if header exists
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=401,
+            detail="Access token required"
+        )
+
+    # ❗ Extract token (not verifying yet)
+    token = authorization.split(" ")[1]
+
+    return {
+        "message": "Access granted (token received)",
+        "token": token
     }
