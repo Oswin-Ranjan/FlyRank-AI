@@ -1,7 +1,9 @@
 from fastapi import FastAPI, Body, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from auth import signup_user, login_user, get_current_user, logout_user
 
 app = FastAPI()
+security = HTTPBearer()
 
 @app.get("/")
 def root():
@@ -53,7 +55,10 @@ def public_info():
 
 # PROTECTED PROFILE
 @app.get("/protected/profile")
-def protected_profile(user = Depends(get_current_user)):
+def protected_profile(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user = Depends(get_current_user)
+):
     return {
         "id": user.id,
         "email": user.email,
@@ -62,12 +67,18 @@ def protected_profile(user = Depends(get_current_user)):
 
 # SECOND PROTECTED ROUTE 
 @app.get("/protected/dashboard")
-def dashboard(user = Depends(get_current_user)):
+def dashboard(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user = Depends(get_current_user)
+):
     return {
         "message": f"Welcome {user.email} to your dashboard"
     }
 
 # LOGOUT (protected)
 @app.post("/auth/logout", status_code=204)
-def logout(user = Depends(get_current_user)):
+def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    user = Depends(get_current_user)
+):
     logout_user()
