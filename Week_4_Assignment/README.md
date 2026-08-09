@@ -94,4 +94,4 @@ Steps:
 
 ## 📸 Screenshot
 
-![Swagger Screenshot](screenshot.png)
+<img width="1238" height="14204" alt="localhost_8000_docs" src="https://github.com/user-attachments/assets/f6aceb65-898b-4ebe-af0e-5e27fde509ea" />
