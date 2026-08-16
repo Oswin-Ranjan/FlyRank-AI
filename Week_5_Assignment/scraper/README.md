@@ -36,10 +36,8 @@ The normalized pipeline will also produce a numeric `price_gbp` value.
 
 Robots.txt result:
 
-[Write here exactly what you observed at https://books.toscrape.com/robots.txt]
+No robots file found. The URL `https://books.toscrape.com/robots.txt` returns HTTP 404 Not Found.
 
 ### Responsible Scraping
-
-Books to Scrape is a practice sandbox intended for scraping exercises, making it an appropriate target for this assignment.
 
 I will not reuse this code on another site without checking its rules and terms first.
