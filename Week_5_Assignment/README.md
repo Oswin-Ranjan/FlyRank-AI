@@ -85,20 +85,32 @@ Instead, it reads the existing HTML file and prints:
 
 This keeps repeated development and testing runs polite by avoiding unnecessary requests to the target website.
 
-### Cache Protection
-
-The `cache/` directory is included in `.gitignore` so downloaded HTML is not committed to the repository.
-
 ---
 
-## Project Structure
+## Stage 2 — Discover Three Catalogue Pages
 
-```text
-scraper/
-├── cache/
-│   └── catalogue-page-1.html
-├── src/
-│   └── main.py
-├── README.md
-├── .gitignore
-└── requirements.txt
+The scraper parses the cached catalogue HTML using Beautiful Soup.
+
+It starts from the Books to Scrape homepage and collects all book links from the first catalogue page.
+
+Book links are converted from relative URLs to absolute URLs using Python's `urljoin()` rather than manually concatenating strings.
+
+The scraper then follows the catalogue's own `Next` link to discover page 2 and then page 3.
+
+The scraper stops after exactly three catalogue pages and does not hardcode the 60 book URLs.
+
+A minimum delay of 500 milliseconds is used between real network requests. Cached pages do not require a delay because they do not contact the website.
+
+Duplicate book URLs are removed before continuing to the next stage.
+
+### Stage 2 Checkpoint
+
+Expected output:
+
+`catalogue_pages=3`
+
+`discovered=60`
+
+`unique_urls=60`
+
+The same numbers should be produced when the scraper is run a second time, with the catalogue pages being read from cache.
