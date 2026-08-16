@@ -1,5 +1,11 @@
 # The Polite Scraper
 
+A responsible web scraper built in Python for the FlyRank AI Week 5 Assignment A9 — "The Polite Scraper".
+
+The project scrapes the public Books to Scrape practice sandbox, processes the first three catalogue pages, discovers 60 unique books, extracts their details, validates and normalizes the records, handles failures, and produces JSON evidence.
+
+---
+
 ## Target Classification
 
 ### Target
@@ -14,30 +20,19 @@ Books to Scrape is a public practice sandbox created specifically for learning a
 
 ### Scope
 
-This assignment will process only the first three catalogue pages of Books to Scrape.
+This scraper processes only the first three catalogue pages.
 
-The scraper will discover the book links from those three catalogue pages and visit the resulting 60 unique book detail pages.
-
-### Data Collected
-
-For each book, the scraper will collect:
-
-- title
-- product_url
-- price_text
-- availability_text
-- rating_text
-- description
-- source_page
-- fetched_at
-
-The normalized pipeline will also produce a numeric `price_gbp` value.
+The scraper discovers the book links from those three catalogue pages and processes the resulting 60 unique book detail pages.
 
 ### Robots Check
 
-Robots.txt result:
+The URL:
 
-No robots file found. The URL `https://books.toscrape.com/robots.txt` returns HTTP 404 Not Found.
+https://books.toscrape.com/robots.txt
+
+returns HTTP 404 Not Found.
+
+No robots file was found.
 
 ### Responsible Scraping
 
@@ -45,140 +40,9 @@ I will not reuse this code on another site without checking its rules and terms 
 
 ---
 
-## Stage 1 — Fetch Once, Cache Once
+## Data Collected
 
-The scraper uses the Python `requests` library to fetch catalogue pages from Books to Scrape.
-
-A descriptive User-Agent is sent with each request:
-
-`FlyRankAI-PoliteScraper/1.0`
-
-A request timeout is also configured to prevent the scraper from waiting indefinitely.
-
-The first catalogue page is fetched from:
-
-https://books.toscrape.com/
-
-The downloaded HTML is stored locally at:
-
-`cache/catalogue-page-1.html`
-
-The cache is used to avoid making the same network request repeatedly.
-
-### First Run
-
-When the cache file does not exist, the scraper makes a network request and prints:
-
-`FETCH`
-
-The downloaded HTML is then saved to:
-
-`cache/catalogue-page-1.html`
-
-### Subsequent Runs
-
-When the cached HTML already exists, the scraper does not make another network request.
-
-Instead, it reads the existing HTML file and prints:
-
-`CACHE HIT`
-
-This keeps repeated development and testing runs polite by avoiding unnecessary requests to the target website.
-
----
-
-## Stage 2 — Discover Three Catalogue Pages
-
-The scraper parses the cached catalogue HTML using Beautiful Soup.
-
-It starts from the Books to Scrape homepage and collects all book links from the first catalogue page.
-
-Book links are converted from relative URLs to absolute URLs using Python's `urljoin()` rather than manually concatenating strings.
-
-The scraper then follows the catalogue's own `Next` link to discover page 2 and then page 3.
-
-The scraper stops after exactly three catalogue pages and does not hardcode the 60 book URLs.
-
-A minimum delay of 500 milliseconds is used between real network requests. Cached pages do not require a delay because they do not contact the website.
-
-Duplicate book URLs are removed before continuing to the next stage.
-
-### Stage 2 Checkpoint
-
-Expected output:
-
-`catalogue_pages=3`
-
-`discovered=60`
-
-`unique_urls=60`
-
-The same numbers should be produced when the scraper is run a second time, with the catalogue pages being read from cache.
-
----
-
-## Stage 3 — Extract the Raw Records
-
-The scraper now visits each of the 60 unique book detail pages discovered in Stage 2.
-
-Each detail page is fetched using the same polite request rules:
-
-- Identifying User-Agent
-- 10-second request timeout
-- HTTP status checking
-- At least 500 ms between real requests
-- Local HTML caching
-
-The detail pages are cached under:
-
-`cache/book-1.html` through `cache/book-60.html`
-
-The scraper extracts the following eight raw fields from the product area:
-
-- title
-- product_url
-- price_text
-- availability_text
-- rating_text
-- description
-- source_page
-- fetched_at
-
-The original text values are kept unchanged at this stage. Normalization and validation are handled in Stage 4.
-
-If a description is missing, the value is stored as `null` rather than being invented.
-
-The `source_page` field records which catalogue page contained the book link, while `fetched_at` records when the detail page was fetched.
-
-### Stage 3 Checkpoint
-
-Expected output:
-
-`detail_pages=60`
-
-The script also prints one complete raw record containing all eight required fields.
-
----
-
-## Stage 4 — Validate Normalized Records
-
-The raw records from Stage 3 are normalized and validated before being stored.
-
-### Price Normalization
-
-The raw `price_text` value is preserved and converted into a numeric `price_gbp` value.
-
-For example:
-
-`£51.77` → `51.77`
-
-Both values are stored in the final record.
-
-### Schema Validation
-
-Pydantic is used to define and validate the final book record schema.
-
-Each record contains:
+Each book record contains:
 
 - title
 - product_url
@@ -190,95 +54,166 @@ Each record contains:
 - source_page
 - fetched_at
 
-The `product_url` is used as the canonical identity of each book.
-
-### Invalid Records
-
-Records that fail normalization or schema validation are written to:
-
-`output/errors.json`
-
-Each error includes the reason and the associated record.
-
-Invalid records are never added to `books.json`.
-
-### Valid Records
-
-Validated records are written to:
-
-`output/books.json`
-
-The output contains exactly 60 unique records.
-
-### Idempotency
-
-Running the scraper multiple times does not create duplicate records.
-
-A second run continues to produce exactly 60 records because duplicate canonical product URLs are ignored.
-
-### Stage 4 Checkpoint
-
-Expected results:
-
-- `books.json` contains exactly 60 records
-- Every `price_gbp` value is numeric
-- Every `product_url` starts with `https://`
-- `errors.json` contains invalid records and their reasons
-- Running the scraper again still produces exactly 60 records
+The original price text is preserved alongside the normalized numeric `price_gbp` value.
 
 ---
 
-## Stage 5 — Survive Failures and Report the Run
+## Scraping Behaviour
 
-The scraper handles each detail page independently so that one failed page does not stop the entire run.
+The scraper uses:
 
-### Failure Handling
+- Requests for HTTP requests
+- Beautiful Soup for HTML parsing
+- Pydantic for schema validation
+- Python JSON for output
+- A descriptive User-Agent
+- A request timeout
+- Local HTML caching
+- A minimum 500 ms delay between real requests
+- One retry for timeouts and 5xx responses
+- No retry for 403 or 404 responses
 
-If a request times out or returns a server-side `5xx` error, the scraper waits briefly and retries once.
+Cached pages are reused on subsequent runs to avoid unnecessary network requests.
 
-The scraper does not retry:
+---
 
-- HTTP 403
-- HTTP 404
+## Project Stages
 
-A failed page is logged and skipped while the remaining pages continue processing.
+### Stage 0 — Classify Scraping Target
 
-### Run Report
+The target was classified as the Books to Scrape practice sandbox.
 
-Every run produces:
+The first three catalogue pages were selected as the scraping scope.
+
+### Stage 1 — Fetch Once, Cache Once
+
+The first catalogue page is fetched using Requests and saved locally.
+
+Subsequent runs reuse the cached HTML instead of downloading the page again.
+
+### Stage 2 — Discover Three Catalogue Pages
+
+The scraper follows the site's own pagination links and discovers exactly three catalogue pages.
+
+Book links are converted to absolute URLs using `urljoin()`.
+
+The result is:
+
+- 3 catalogue pages
+- 60 discovered book URLs
+- 60 unique book URLs
+
+### Stage 3 — Extract Book Details
+
+The scraper visits the 60 unique book detail pages and extracts:
+
+- title
+- product_url
+- price_text
+- availability_text
+- rating_text
+- description
+- source_page
+- fetched_at
+
+Missing descriptions are represented as `null`.
+
+### Stage 4 — Validate Normalized Records
+
+The raw records are normalized and validated using Pydantic.
+
+The raw price is preserved and converted into a numeric `price_gbp` value.
+
+The canonical identity of each book is its absolute `product_url`.
+
+Valid records are written to:
+
+`output/books.json`
+
+Invalid records are written to:
+
+`output/errors.json`
+
+### Stage 5 — Survive Failures and Report the Run
+
+The scraper handles individual page failures without stopping the entire run.
+
+Timeouts and 5xx responses are retried once.
+
+403 and 404 responses are not retried.
+
+Each run produces:
 
 `output/run-report.json`
 
-The report contains:
+The report records:
 
-- start_time
-- duration_seconds
-- pages_fetched
-- cache_hits
-- valid_records
-- invalid_records
-- failed_pages
+- start time
+- duration
+- pages fetched
+- cache hits
+- valid records
+- invalid records
+- failed pages
 
-### Failure Test
+A deliberate fake URL was used during testing to confirm that a failed page does not prevent the remaining 60 valid records from being produced.
 
-A deliberately fake book URL was temporarily added to the discovered URL list to test failure handling.
+---
 
-The scraper completed successfully despite the fake page.
+## Output Files
 
-Expected result:
+### `output/books.json`
 
-- 60 valid records remain in `books.json`
-- `failed_pages` equals 1 in `run-report.json`
-- The fake URL is recorded in `errors.json`
+Contains the 60 validated and normalized book records.
 
-The fake URL was removed after the checkpoint test so the normal scraper continues to process only the 60 real books.
+### `output/errors.json`
 
-### Stage 5 Checkpoint
+Contains records or pages that failed validation or fetching.
 
-The failure-handling test completed without crashing the scraper.
+### `output/run-report.json`
 
-`books.json` contained 60 valid records.
+Contains statistics about the scraper run.
 
-`run-report.json` reported:
+### Sample 'run-report.json'
 
-`failed_pages: 1`
+{
+  "start_time": "2026-08-16T14:49:09.824439Z",
+  "duration_seconds": 0.661,
+  "pages_fetched": 0,
+  "cache_hits": 63,
+  "valid_records": 60,
+  "invalid_records": 0,
+  "failed_pages": 0
+}
+
+---
+
+## API / Scraper Results
+
+| Result | Expected |
+|---|---:|
+| Catalogue pages | 3 |
+| Discovered books | 60 |
+| Unique book URLs | 60 |
+| Detail pages | 60 |
+| Valid records | 60 |
+
+---
+
+## Setup
+
+### 1. Clone the Repository
+
+Clone this repository and enter the `scraper` directory.
+
+### 2. Install Dependencies
+
+Install the packages listed in `requirements.txt`.
+
+### 3. Run the Scraper
+
+Run:
+
+`python src/main.py`
+
+The scraper will create the required output files automatically.
