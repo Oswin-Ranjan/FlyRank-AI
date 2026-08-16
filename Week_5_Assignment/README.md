@@ -114,3 +114,46 @@ Expected output:
 `unique_urls=60`
 
 The same numbers should be produced when the scraper is run a second time, with the catalogue pages being read from cache.
+
+---
+
+## Stage 3 — Extract the Raw Records
+
+The scraper now visits each of the 60 unique book detail pages discovered in Stage 2.
+
+Each detail page is fetched using the same polite request rules:
+
+- Identifying User-Agent
+- 10-second request timeout
+- HTTP status checking
+- At least 500 ms between real requests
+- Local HTML caching
+
+The detail pages are cached under:
+
+`cache/book-1.html` through `cache/book-60.html`
+
+The scraper extracts the following eight raw fields from the product area:
+
+- title
+- product_url
+- price_text
+- availability_text
+- rating_text
+- description
+- source_page
+- fetched_at
+
+The original text values are kept unchanged at this stage. Normalization and validation are handled in Stage 4.
+
+If a description is missing, the value is stored as `null` rather than being invented.
+
+The `source_page` field records which catalogue page contained the book link, while `fetched_at` records when the detail page was fetched.
+
+### Stage 3 Checkpoint
+
+Expected output:
+
+`detail_pages=60`
+
+The script also prints one complete raw record containing all eight required fields.
