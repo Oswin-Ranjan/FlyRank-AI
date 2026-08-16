@@ -157,3 +157,71 @@ Expected output:
 `detail_pages=60`
 
 The script also prints one complete raw record containing all eight required fields.
+
+---
+
+## Stage 4 — Validate Normalized Records
+
+The raw records from Stage 3 are normalized and validated before being stored.
+
+### Price Normalization
+
+The raw `price_text` value is preserved and converted into a numeric `price_gbp` value.
+
+For example:
+
+`£51.77` → `51.77`
+
+Both values are stored in the final record.
+
+### Schema Validation
+
+Pydantic is used to define and validate the final book record schema.
+
+Each record contains:
+
+- title
+- product_url
+- price_text
+- price_gbp
+- availability_text
+- rating_text
+- description
+- source_page
+- fetched_at
+
+The `product_url` is used as the canonical identity of each book.
+
+### Invalid Records
+
+Records that fail normalization or schema validation are written to:
+
+`output/errors.json`
+
+Each error includes the reason and the associated record.
+
+Invalid records are never added to `books.json`.
+
+### Valid Records
+
+Validated records are written to:
+
+`output/books.json`
+
+The output contains exactly 60 unique records.
+
+### Idempotency
+
+Running the scraper multiple times does not create duplicate records.
+
+A second run continues to produce exactly 60 records because duplicate canonical product URLs are ignored.
+
+### Stage 4 Checkpoint
+
+Expected results:
+
+- `books.json` contains exactly 60 records
+- Every `price_gbp` value is numeric
+- Every `product_url` starts with `https://`
+- `errors.json` contains invalid records and their reasons
+- Running the scraper again still produces exactly 60 records
