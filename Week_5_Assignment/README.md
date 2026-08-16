@@ -225,3 +225,60 @@ Expected results:
 - Every `product_url` starts with `https://`
 - `errors.json` contains invalid records and their reasons
 - Running the scraper again still produces exactly 60 records
+
+---
+
+## Stage 5 — Survive Failures and Report the Run
+
+The scraper handles each detail page independently so that one failed page does not stop the entire run.
+
+### Failure Handling
+
+If a request times out or returns a server-side `5xx` error, the scraper waits briefly and retries once.
+
+The scraper does not retry:
+
+- HTTP 403
+- HTTP 404
+
+A failed page is logged and skipped while the remaining pages continue processing.
+
+### Run Report
+
+Every run produces:
+
+`output/run-report.json`
+
+The report contains:
+
+- start_time
+- duration_seconds
+- pages_fetched
+- cache_hits
+- valid_records
+- invalid_records
+- failed_pages
+
+### Failure Test
+
+A deliberately fake book URL was temporarily added to the discovered URL list to test failure handling.
+
+The scraper completed successfully despite the fake page.
+
+Expected result:
+
+- 60 valid records remain in `books.json`
+- `failed_pages` equals 1 in `run-report.json`
+- The fake URL is recorded in `errors.json`
+
+The fake URL was removed after the checkpoint test so the normal scraper continues to process only the 60 real books.
+
+### Stage 5 Checkpoint
+
+The failure-handling test completed without crashing the scraper.
+
+`books.json` contained 60 valid records.
+
+`run-report.json` reported:
+
+`failed_pages: 1`
