@@ -1,15 +1,26 @@
-from pydantic_settings import BaseSettings
+import os
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
 class Settings(BaseSettings):
-    database_url: str
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+    database_url: str = Field(
+        default_factory=lambda: os.getenv(
+            "DATABASE_URL",
+            "postgresql://postgres:postgres@localhost:5432/metering_billing",
+        )
+    )
 
 
-settings = Settings(
-    _env_file=".env",
-)
+settings = Settings()
 
 engine = create_engine(
     settings.database_url,

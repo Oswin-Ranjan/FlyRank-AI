@@ -17,11 +17,17 @@ Planned proof:
 - FastAPI `/docs` loads successfully
 
 ### Database schema
-Status: In progress
+Status: Complete
+
+Command:
+
+```bash
+alembic upgrade head
 
 Planned proof:
 - Alembic migration output
 - PostgreSQL table listing
+```
 
 ### Idempotency
 Status: Not started
