@@ -23,11 +23,53 @@ Command:
 
 ```bash
 alembic upgrade head
-
-Planned proof:
-- Alembic migration output
-- PostgreSQL table listing
 ```
+
+Evidence:
+- Alembic migration completed successfully.
+- PostgreSQL tables verified:
+  
+  • tenants
+  
+  • plans
+  
+  • subscriptions
+  
+  • usage_events
+  
+  • stripe_events
+  
+  • alembic_version
+
+## Seed Data
+
+Status: Complete
+
+Command:
+
+```bash
+python -m app.seed
+```
+
+Evidence:
+
+  • Free plan created
+  
+  • Pro plan created
+  
+  • Demo tenant created
+  
+  • Demo tenant assigned a Free subscription
+
+Terminal output:
+
+  Database seeded successfully.
+  
+  Free Plan ID: 1
+  
+  Pro Plan ID: 2
+  
+  Demo Tenant ID: 1
 
 ### Idempotency
 Status: Not started
