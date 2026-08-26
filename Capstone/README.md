@@ -46,3 +46,5 @@ Stripe test mode is used only for subscription-flow testing.
 ## Project Status
 
 Phase 1 - Design and project setup
+
+Phase 2 - Core billing logic

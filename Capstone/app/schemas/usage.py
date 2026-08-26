@@ -20,3 +20,13 @@ class GenerateResponse(BaseModel):
     quantity: int
     idempotency_key: str
     status: str
+    
+class UsageSummaryItem(BaseModel):
+    used: int
+    limit: int
+
+
+class UsageResponse(BaseModel):
+    api_calls: UsageSummaryItem
+    ai_tokens: UsageSummaryItem
+    cost: int    

@@ -9,6 +9,7 @@ Evidence will be added continuously as each requirement is completed.
 ## Phase 1
 
 ### Project starts successfully
+
 Status: In progress
 
 Planned proof:
@@ -17,6 +18,7 @@ Planned proof:
 - FastAPI `/docs` loads successfully
 
 ### Database schema
+
 Status: Complete
 
 Command:
@@ -66,7 +68,6 @@ Terminal output:
 Status: Complete
 
 Evidence:
-
 - DESIGN.md documents:
   - Problem
   - Scope
@@ -98,18 +99,34 @@ Evidence:
 - Detailed behavior is documented in DESIGN.md.
 
 ### Idempotency
-Status: Not started
+
+Status: Complete
+
+Evidence:
+- Repeated requests using the same Idempotency-Key returned the same usage event.
+- The repeated request did not create a second usage event.
+- Database verification showed only one usage event for the repeated idempotency key.
 
 ### Quota enforcement
-Status: Not started
+
+Status: Complete
+
+Evidence:
+- Quota is checked before recording a new usage event.
+- Usage is calculated against the tenant's active subscription plan.
+- Requests exceeding the plan limit return "429 Too Many Requests".
+- Rejected requests are not recorded as usage events.
 
 ### Cost calculation
+
 Status: Not started
 
 ### Stripe integration
+
 Status: Not started
 
 ### Testing
+
 Status: Not started
 
 ---
@@ -118,19 +135,130 @@ Status: Not started
 
 ### Idempotent usage metering
 
-Status: In Progress
+Status: Complete
+
+
+Manual API test:
+
+POST /generate
+
+X-Tenant-ID: <tenant_id>
+
+Idempotency-Key: api-test-001
+
+
+Request:
+
+{
+  "usage_type": "API_CALL",
+  "quantity": 1
+}
 
 Evidence:
-
-- Same `Idempotency-Key` returned the same usage event.
-- Database contained only one usage event for the repeated request.
+- First request successfully created a usage event.
+- Sending the same request again with the same "Idempotency-Key" returned the same usage event.
+- The database contained only one usage event for the repeated request.
+- Using a different idempotency key created a separate usage event.
 
 ### Quota enforcement
 
-Status: In Progress
+Status: Complete
+
+Manual boundary test:
+
+Temporary Free-plan API quota:
+
+API call limit = 3
+
+Test sequence:
+
+Request 1 → Allowed
+
+Request 2 → Allowed
+
+Request 3 → Allowed
+
+Request 4 → Rejected
 
 Evidence:
-
 - Request taking usage exactly to the configured limit was allowed.
 - Request exceeding the configured limit returned HTTP 429.
-- Response explained current usage, requested quantity, and limit.
+- The response explained:
+  - current usage
+  - requested quantity
+  - usage type
+  - configured limit
+- The request exceeding the limit was not recorded as a usage event.
+
+After testing, the Free-plan API call limit was restored to: 1000 API calls/month
+
+### API Validation
+
+Status: In Progress
+
+Planned tests:
+- Zero quantity → 422
+- Negative quantity → 422
+- Invalid usage type → 422
+- Missing Idempotency-Key → 422
+- Nonexistent tenant → 404
+
+### Usage Summary
+
+Status: In Progress
+
+Endpoint: GET /usage
+
+Planned evidence:
+- API call usage is returned.
+- AI token usage is returned.
+- Plan limits are returned.
+- Current cost is returned.
+
+### Automated Idempotency Tests
+
+Status: In Progress
+
+Planned tests:
+- Same idempotency key creates one event.
+- Different idempotency keys create different events.
+- Repeated API request returns the original usage event.
+
+### Automated Quota Tests
+
+Status: In Progress
+
+Planned tests:
+- Usage just below the limit.
+- Usage exactly at the limit.
+- Usage above the limit.
+- Over-limit request returns 429.
+
+### Cost calculation
+
+Status: Not started
+
+### Stripe integration
+
+Status: Not started
+
+### Testing
+
+Status: In Progress
+
+Current manual tests completed:
+- GET /health
+- POST /generate normal request
+- Repeated POST /generate with same idempotency key
+- POST /generate with different idempotency key
+- AI token metering
+- Quota boundary test
+- Over-quota 429 test
+- Tenant lookup validation
+
+Remaining:
+- Complete automated pytest coverage.
+- Complete API validation tests.
+- Complete usage summary tests.
+- Complete Stripe tests.
+- Complete cost calculation tests.
