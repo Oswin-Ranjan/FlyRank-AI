@@ -28,20 +28,14 @@ alembic upgrade head
 Evidence:
 - Alembic migration completed successfully.
 - PostgreSQL tables verified:
-  
-  • tenants
-  
-  • plans
-  
-  • subscriptions
-  
-  • usage_events
-  
-  • stripe_events
-  
-  • alembic_version
+  - tenants
+  - plans
+  - subscriptions
+  - usage_events
+  - stripe_events
+  - alembic_version
 
-## Seed Data
+### Seed Data
 
 Status: Complete
 
@@ -52,14 +46,10 @@ python -m app.seed
 ```
 
 Evidence:
-
-  • Free plan created
-  
-  • Pro plan created
-  
-  • Demo tenant created
-  
-  • Demo tenant assigned a Free subscription
+- Free plan created
+- Pro plan created
+- Demo tenant created
+- Demo tenant assigned a Free subscription
 
 Terminal output:
 
@@ -70,6 +60,42 @@ Terminal output:
   Pro Plan ID: 2
   
   Demo Tenant ID: 1
+
+### Design Document  
+
+Status: Complete
+
+Evidence:
+
+- DESIGN.md documents:
+  - Problem
+  - Scope
+  - Plans and quotas
+  - Data model
+  - API surface
+  - Idempotency strategy
+  - Quota strategy
+  - Layered architecture
+  - Explicit non-goal
+
+### API contract
+
+Status: Complete
+
+Defined API surface:
+- POST /generate
+- GET /usage
+- POST /billing/checkout
+- POST /webhooks/stripe
+
+### Idempotency strategy
+
+Status: Complete
+
+Evidence:
+- usage_events contains idempotency_key.
+- A unique constraint exists on (tenant_id, idempotency_key).
+- Detailed behavior is documented in DESIGN.md.
 
 ### Idempotency
 Status: Not started
