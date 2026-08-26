@@ -111,3 +111,26 @@ Status: Not started
 
 ### Testing
 Status: Not started
+
+---
+
+## Phase 2
+
+### Idempotent usage metering
+
+Status: In Progress
+
+Evidence:
+
+- Same `Idempotency-Key` returned the same usage event.
+- Database contained only one usage event for the repeated request.
+
+### Quota enforcement
+
+Status: In Progress
+
+Evidence:
+
+- Request taking usage exactly to the configured limit was allowed.
+- Request exceeding the configured limit returned HTTP 429.
+- Response explained current usage, requested quantity, and limit.
