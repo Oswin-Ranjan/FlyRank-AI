@@ -227,4 +227,119 @@ def test_generate_requires_idempotency_key(db):
 
     assert response.status_code == 422
 
+    app.dependency_overrides.clear()   
+
+def test_generate_rejects_negative_quantity(db):
+    tenant = create_tenant(db)
+
+    app.dependency_overrides[get_db] = override_get_db(db)
+
+    client = TestClient(app)
+
+    response = client.post(
+        "/generate",
+        headers={
+            "X-Tenant-ID": str(tenant.id),
+            "Idempotency-Key": "validation-negative",
+        },
+        json={
+            "usage_type": "API_CALL",
+            "quantity": -1,
+        },
+    )
+
+    assert response.status_code == 422
+
+    app.dependency_overrides.clear()     
+    
+def test_generate_rejects_invalid_usage_type(db):
+    tenant = create_tenant(db)
+
+    app.dependency_overrides[get_db] = override_get_db(db)
+
+    client = TestClient(app)
+
+    response = client.post(
+        "/generate",
+        headers={
+            "X-Tenant-ID": str(tenant.id),
+            "Idempotency-Key": "validation-type",
+        },
+        json={
+            "usage_type": "VIDEO_MINUTES",
+            "quantity": 1,
+        },
+    )
+
+    assert response.status_code == 422
+
+    app.dependency_overrides.clear()   
+    
+def test_generate_rejects_unknown_tenant(db):
+    app.dependency_overrides[get_db] = override_get_db(db)
+
+    client = TestClient(app)
+
+    response = client.post(
+        "/generate",
+        headers={
+            "X-Tenant-ID": "999999",
+            "Idempotency-Key": "unknown-tenant",
+        },
+        json={
+            "usage_type": "API_CALL",
+            "quantity": 1,
+        },
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Tenant not found"
+
+    app.dependency_overrides.clear()     
+    
+def test_usage_tracks_api_calls_and_ai_tokens_separately(db):
+    tenant = create_tenant(db)
+
+    app.dependency_overrides[get_db] = override_get_db(db)
+
+    client = TestClient(app)
+
+    client.post(
+        "/generate",
+        headers={
+            "X-Tenant-ID": str(tenant.id),
+            "Idempotency-Key": "api-usage-1",
+        },
+        json={
+            "usage_type": "API_CALL",
+            "quantity": 2,
+        },
+    )
+
+    client.post(
+        "/generate",
+        headers={
+            "X-Tenant-ID": str(tenant.id),
+            "Idempotency-Key": "token-usage-1",
+        },
+        json={
+            "usage_type": "AI_TOKEN",
+            "quantity": 50,
+        },
+    )
+
+    response = client.get(
+        "/usage",
+        headers={
+            "X-Tenant-ID": str(tenant.id),
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["api_calls"]["used"] == 2
+    assert data["ai_tokens"]["used"] == 50
+
     app.dependency_overrides.clear()    

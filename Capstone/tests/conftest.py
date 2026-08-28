@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -6,14 +9,27 @@ from app.db.base import Base
 from app.models import Plan, Tenant, Subscription, UsageEvent
 
 
-TEST_DATABASE_URL = (
-    "postgresql://postgres:postgres@localhost:5433/metering_billing"
-)
+def _build_test_database_url() -> str:
+    configured_url = os.getenv("TEST_DATABASE_URL")
+    if configured_url:
+        return configured_url
+
+    project_root = Path(__file__).resolve().parent.parent
+    sqlite_db = project_root / "test_data" / "test.db"
+    sqlite_db.parent.mkdir(parents=True, exist_ok=True)
+    return f"sqlite:///{sqlite_db}"
+
+
+TEST_DATABASE_URL = _build_test_database_url()
 
 
 @pytest.fixture
 def db():
-    engine = create_engine(TEST_DATABASE_URL)
+    engine_kwargs = {}
+    if TEST_DATABASE_URL.startswith("sqlite"):
+        engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+    engine = create_engine(TEST_DATABASE_URL, **engine_kwargs)
 
     Base.metadata.create_all(bind=engine)
 
@@ -74,3 +90,9 @@ def free_tenant(db: Session):
     db.commit()
 
     return tenant
+
+@pytest.fixture(autouse=True)
+def clear_dependency_overrides():
+    yield
+    from app.main import app
+    app.dependency_overrides.clear()

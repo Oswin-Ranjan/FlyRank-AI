@@ -194,9 +194,9 @@ After testing, the Free-plan API call limit was restored to: 1000 API calls/mont
 
 ### API Validation
 
-Status: In Progress
+Status: Complete
 
-Planned tests:
+Evidence:
 - Zero quantity → 422
 - Negative quantity → 422
 - Invalid usage type → 422
@@ -205,30 +205,31 @@ Planned tests:
 
 ### Usage Summary
 
-Status: In Progress
+Status: Complete
 
 Endpoint: GET /usage
 
 Planned evidence:
-- API call usage is returned.
-- AI token usage is returned.
+- `GET /usage` returns API call usage.
+- `GET /usage` returns AI token usage.
 - Plan limits are returned.
 - Current cost is returned.
+- API calls and AI token usage are tracked independently.
 
 ### Automated Idempotency Tests
 
-Status: In Progress
+Status: Complete
 
-Planned tests:
+Evidence:
 - Same idempotency key creates one event.
 - Different idempotency keys create different events.
 - Repeated API request returns the original usage event.
 
 ### Automated Quota Tests
 
-Status: In Progress
+Status: Complete
 
-Planned tests:
+Evidence:
 - Usage just below the limit.
 - Usage exactly at the limit.
 - Usage above the limit.
