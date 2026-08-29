@@ -31,6 +31,7 @@ def db():
 
     engine = create_engine(TEST_DATABASE_URL, **engine_kwargs)
 
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
     SessionLocal = sessionmaker(
@@ -92,7 +93,14 @@ def free_tenant(db: Session):
     return tenant
 
 @pytest.fixture(autouse=True)
-def clear_dependency_overrides():
-    yield
+def clear_dependency_overrides(db: Session):
+    from app.db.session import get_db
     from app.main import app
+
+    def override_get_db():
+        yield db
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    yield
     app.dependency_overrides.clear()

@@ -8,4 +8,4 @@ pydantic-settings
 python-dotenv
 stripe
 pytest
-httpx
+httpx<0.28

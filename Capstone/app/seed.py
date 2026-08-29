@@ -1,5 +1,5 @@
 from sqlalchemy import select
-
+from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models import Plan, Tenant, Subscription
 
@@ -29,11 +29,14 @@ def seed():
 
         if not pro_plan:
             pro_plan = Plan(
-                name="Pro",
-                api_call_limit=10000,
-                ai_token_limit=1000000,
-            )
+            name="Pro",
+            api_call_limit=10000,
+            ai_token_limit=1000000,
+            provider_plan_id=settings.razorpay_pro_plan_id,
+        )
             db.add(pro_plan)
+        else:
+            pro_plan.provider_plan_id = settings.razorpay_pro_plan_id
 
         db.flush()
 

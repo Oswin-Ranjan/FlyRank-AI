@@ -30,7 +30,7 @@ from app.models import (
     Plan,
     Subscription,
     UsageEvent,
-    StripeEvent,
+    PaymentEvent,
 )
 
 target_metadata = Base.metadata

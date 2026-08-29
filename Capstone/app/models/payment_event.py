@@ -6,12 +6,12 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
 
-class StripeEvent(Base):
-    __tablename__ = "stripe_events"
+class PaymentEvent(Base):
+    __tablename__ = "payment_events"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    stripe_event_id: Mapped[str] = mapped_column(
+    provider_event_id: Mapped[str] = mapped_column(
         String(255),
         unique=True,
         nullable=False,
