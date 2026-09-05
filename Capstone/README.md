@@ -48,3 +48,5 @@ Stripe test mode is used only for subscription-flow testing.
 Phase 1 - Design and project setup
 
 Phase 2 - Core billing logic
+
+Phase 3 - Razorpay Integration
